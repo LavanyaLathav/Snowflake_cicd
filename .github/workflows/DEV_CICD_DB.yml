@@ -1,0 +1,26 @@
+name: DEV_CICD_DB
+# Controls when the workflow will run
+on:
+# Triggers the workflow on push or pull request events but only for the develop branch
+# push:
+# branches: [ develop ]
+# Allows you to run this workflow manually from the Actions tab
+workflow_dispatch:
+jobs:
+liquibase-action:
+runs-on: ubuntu-latest
+environment: DEV_McKesson_Snowflake
+steps:
+- uses: actions/checkout@v2
+# note the below assumes that a host path or volume is mounted into the container at ./Docker (or action will fail) !!!
+- name: Run 'Liquibase status' in a Docker Container
+uses: docker://liquibase/liquibase:latest
+with:
+args: --url=${{ secrets.SF_URL }} --changeLogFile=./DEV_CICD_DB/DEV_CICD_DB_CHANGE_1.xml --username=${{ secrets.
+SF_USERNAME }} --driver=${{ secrets.SF_DRIVER }} status --verbose 
+
+- name: Run 'Liquibase update' in a Docker Container
+uses: docker://liquibase/liquibase:latest
+with:
+args: --url=${{ secrets.SF_URL }} --changeLogFile=./DEV_CICD_DB/DEV_CICD_DB_CHANGE_1.xml --username=${{ secrets.
+SF_USERNAME }} --driver=${{ secrets.SF_DRIVER }} update --log-level WARNING
